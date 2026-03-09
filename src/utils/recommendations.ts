@@ -59,7 +59,6 @@ const DEFAULT_RECOMMENDATIONS = [
   "Look for connections between your project and real-world applications.",
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function generateRecommendation(updateContent: string): string {
   const lowerContent = updateContent.toLowerCase();
 

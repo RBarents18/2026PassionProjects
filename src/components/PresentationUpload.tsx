@@ -106,7 +106,7 @@ export default function PresentationUpload({ onApply, compact = false }: Present
               {status === 'parsing' ? (
                 <div className="flex flex-col items-center gap-2 text-gray-400">
                   <Loader2 size={28} className="animate-spin text-indigo-400" />
-                  <p className="text-sm">Reading &amp; analysing {fileName}…</p>
+                  <p className="text-sm">Reading &amp; analyzing {fileName}…</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2">

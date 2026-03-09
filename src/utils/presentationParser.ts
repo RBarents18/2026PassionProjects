@@ -250,12 +250,12 @@ export function parsePresentation(text: string): ParsedPresentation {
     'milestone', 'timeline', 'schedule', 'phase', 'deliverable', 'task', 'checkpoint',
   ]);
 
-  const milestones: Milestone[] = milestoneLines.slice(0, 10).map((line, i) => {
+  const milestones: Milestone[] = milestoneLines.slice(0, 10).map(line => {
     const dateHit = line.match(DATE_RE);
     const dueDate = dateHit ? normalizeDate(dateHit[0]) : '';
     const cleanTitle = line.replace(DATE_RE, '').replace(/[-–:]+$/, '').trim() || line;
     return {
-      id: `m_${Date.now()}_${i}`,
+      id: crypto.randomUUID(),
       title: cleanTitle,
       dueDate,
       completed: false,

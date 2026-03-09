@@ -40,7 +40,7 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
   const handleApplyPresentation = (data: ParsedPresentation) => {
     const newMilestones: Milestone[] = data.milestones.map(m => ({
       ...m,
-      id: `m_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      id: crypto.randomUUID(),
     }));
     const newBrainstormItems = data.nextSteps.filter(s => !project.brainstorm.includes(s));
     onUpdate({
@@ -91,7 +91,7 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
   const handleAddMilestone = () => {
     if (!newMilestoneTitle.trim()) return;
     const newMilestone: Milestone = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: newMilestoneTitle.trim(),
       dueDate: newMilestoneDueDate,
       completed: false,

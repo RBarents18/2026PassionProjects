@@ -5,6 +5,13 @@ export interface Update {
   recommendation?: string;
 }
 
+export interface Milestone {
+  id: string;
+  title: string;
+  dueDate: string;
+  completed: boolean;
+}
+
 export interface Project {
   id: string;
   studentName: string;
@@ -17,6 +24,7 @@ export interface Project {
   updates: Update[];
   notes: string;
   brainstorm: string[];
+  milestones: Milestone[];
   color: string;
   emoji: string;
 }

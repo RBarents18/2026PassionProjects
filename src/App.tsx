@@ -8,18 +8,15 @@ import ProjectForm from './components/ProjectForm';
 type View = 'dashboard' | 'detail' | 'create' | 'edit';
 
 export default function App() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  // Lazy initializer so projects are loaded once from storage on mount
+  // without needing a separate effect — this also prevents the save effect
+  // from running before data has been loaded.
+  const [projects, setProjects] = useState<Project[]>(() => loadProjects());
   const [view, setView] = useState<View>('dashboard');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   useEffect(() => {
-    setProjects(loadProjects());
-  }, []);
-
-  useEffect(() => {
-    if (projects.length > 0) {
-      saveProjects(projects);
-    }
+    saveProjects(projects);
   }, [projects]);
 
   const selectedProject = projects.find(p => p.id === selectedProjectId) ?? null;

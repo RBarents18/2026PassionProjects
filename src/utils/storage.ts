@@ -3,14 +3,21 @@ import type { Project } from '../types';
 const STORAGE_KEY = 'passion_projects_v1';
 
 export function loadProjects(): Project[] {
+  const seedProjects = getSampleProjects();
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return getSampleProjects();
-    const projects = JSON.parse(data) as Project[];
+    if (!data) return seedProjects;
+    const stored = JSON.parse(data) as Project[];
     // Backward compatibility: ensure milestones field exists
-    return projects.map(p => ({ ...p, milestones: p.milestones ?? [] }));
+    const storedProjects = stored.map(p => ({ ...p, milestones: p.milestones ?? [] }));
+    // Merge: include any seed projects whose IDs are not already in stored data.
+    // This ensures projects added to getSampleProjects() always appear even when
+    // localStorage already has entries, preventing manual additions from being lost.
+    const storedIds = new Set(storedProjects.map(p => p.id));
+    const missingSeedProjects = seedProjects.filter(p => !storedIds.has(p.id));
+    return [...missingSeedProjects, ...storedProjects];
   } catch {
-    return getSampleProjects();
+    return seedProjects;
   }
 }
 

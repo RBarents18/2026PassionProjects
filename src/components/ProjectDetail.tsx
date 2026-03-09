@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import type { Project, Update } from '../types';
+import type { Project, Update, Milestone } from '../types';
 import { generateRecommendation } from '../utils/recommendations';
 import {
   ArrowLeft, Edit, Trash2, Plus, Lightbulb, MessageSquare,
   FileText, Sparkles, Calendar, Tag, Clock, AlertTriangle,
-  TrendingUp, CheckCircle, X
+  TrendingUp, CheckCircle, X, Upload, Flag,
 } from 'lucide-react';
+import PresentationUpload from './PresentationUpload';
+import type { ParsedPresentation } from '../utils/presentationParser';
 
 interface ProjectDetailProps {
   project: Project;
@@ -22,7 +24,7 @@ const STATUS_CONFIG = {
   'completed': { label: 'Completed', color: 'text-blue-400', bg: 'bg-blue-900/30 border-blue-800', icon: CheckCircle },
 };
 
-type Tab = 'updates' | 'notes' | 'brainstorm';
+type Tab = 'updates' | 'notes' | 'brainstorm' | 'presentation';
 
 export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpdate }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState<Tab>('updates');
@@ -30,6 +32,27 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
   const [newBrainstormItem, setNewBrainstormItem] = useState('');
   const [notes, setNotes] = useState(project.notes);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [newMilestoneTitle, setNewMilestoneTitle] = useState('');
+  const [newMilestoneDueDate, setNewMilestoneDueDate] = useState('');
+
+  const milestones: Milestone[] = project.milestones ?? [];
+
+  const handleApplyPresentation = (data: ParsedPresentation) => {
+    const newMilestones: Milestone[] = data.milestones.map(m => ({
+      ...m,
+      id: crypto.randomUUID(),
+    }));
+    const newBrainstormItems = data.nextSteps.filter(s => !project.brainstorm.includes(s));
+    onUpdate({
+      ...project,
+      studentName: data.studentName || project.studentName,
+      title: data.title || project.title,
+      description: data.description || project.description,
+      milestones: [...milestones, ...newMilestones],
+      brainstorm: [...project.brainstorm, ...newBrainstormItems],
+    });
+    setActiveTab('presentation');
+  };
 
   const status = STATUS_CONFIG[project.status];
   const StatusIcon = status.icon;
@@ -63,6 +86,30 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
 
   const handleDeleteBrainstorm = (index: number) => {
     onUpdate({ ...project, brainstorm: project.brainstorm.filter((_, i) => i !== index) });
+  };
+
+  const handleAddMilestone = () => {
+    if (!newMilestoneTitle.trim()) return;
+    const newMilestone: Milestone = {
+      id: crypto.randomUUID(),
+      title: newMilestoneTitle.trim(),
+      dueDate: newMilestoneDueDate,
+      completed: false,
+    };
+    onUpdate({ ...project, milestones: [...milestones, newMilestone] });
+    setNewMilestoneTitle('');
+    setNewMilestoneDueDate('');
+  };
+
+  const handleToggleMilestone = (id: string) => {
+    onUpdate({
+      ...project,
+      milestones: milestones.map(m => m.id === id ? { ...m, completed: !m.completed } : m),
+    });
+  };
+
+  const handleDeleteMilestone = (id: string) => {
+    onUpdate({ ...project, milestones: milestones.filter(m => m.id !== id) });
   };
 
   return (
@@ -130,6 +177,7 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
             { id: 'updates', label: 'Updates Log', icon: MessageSquare },
             { id: 'notes', label: 'Teacher Notes', icon: FileText },
             { id: 'brainstorm', label: 'Brainstorm', icon: Lightbulb },
+            { id: 'presentation', label: 'Presentation', icon: Upload },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -277,6 +325,101 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
                 ))}
                 {project.brainstorm.length === 0 && (
                   <p className="text-gray-500 text-center py-8 col-span-2">No brainstorm ideas yet. Add ideas to explore!</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Presentation Tab */}
+          {activeTab === 'presentation' && (
+            <div className="space-y-6">
+              {/* Upload section */}
+              <PresentationUpload onApply={handleApplyPresentation} />
+
+              {/* Milestones / Timeline */}
+              <div>
+                <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                  <Flag size={16} className="text-indigo-400" />
+                  Project Timeline &amp; Milestones
+                </h3>
+
+                {/* Add milestone */}
+                <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 mb-4">
+                  <p className="text-sm text-gray-400 mb-3">Add a milestone manually</p>
+                  <div className="flex gap-2 flex-wrap">
+                    <input
+                      type="text"
+                      value={newMilestoneTitle}
+                      onChange={e => setNewMilestoneTitle(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddMilestone()}
+                      placeholder="Milestone title…"
+                      className="flex-1 min-w-[160px] bg-gray-800 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
+                    />
+                    <input
+                      type="date"
+                      value={newMilestoneDueDate}
+                      onChange={e => setNewMilestoneDueDate(e.target.value)}
+                      className="bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
+                    />
+                    <button
+                      onClick={handleAddMilestone}
+                      disabled={!newMilestoneTitle.trim()}
+                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                    >
+                      <Plus size={16} />
+                      Add
+                    </button>
+                  </div>
+                </div>
+
+                {/* Milestone list */}
+                <div className="space-y-2">
+                  {milestones.map(m => (
+                    <div
+                      key={m.id}
+                      className="bg-gray-900 rounded-xl border border-gray-800 p-4 flex items-start gap-3 group"
+                    >
+                      <button
+                        onClick={() => handleToggleMilestone(m.id)}
+                        className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded border transition-colors cursor-pointer ${
+                          m.completed
+                            ? 'bg-green-500 border-green-500 text-white'
+                            : 'border-gray-600 hover:border-green-400'
+                        }`}
+                        title={m.completed ? 'Mark incomplete' : 'Mark complete'}
+                      >
+                        {m.completed && <CheckCircle size={14} className="m-auto" />}
+                      </button>
+                      <div className="flex-1">
+                        <p className={`text-sm ${m.completed ? 'line-through text-gray-500' : 'text-white'}`}>
+                          {m.title}
+                        </p>
+                        {m.dueDate && (
+                          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                            <Calendar size={11} />
+                            Due {m.dueDate}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteMilestone(m.id)}
+                        className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  {milestones.length === 0 && (
+                    <p className="text-gray-500 text-center py-8">
+                      No milestones yet. Upload a presentation or add one manually above.
+                    </p>
+                  )}
+                </div>
+
+                {milestones.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-3">
+                    {milestones.filter(m => m.completed).length} of {milestones.length} milestones completed
+                  </p>
                 )}
               </div>
             </div>

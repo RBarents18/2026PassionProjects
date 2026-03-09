@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Project } from '../types';
 import { ArrowLeft, Save } from 'lucide-react';
+import PresentationUpload from './PresentationUpload';
+import type { ParsedPresentation } from '../utils/presentationParser';
 
 interface ProjectFormProps {
   project: Project | null;
@@ -58,8 +60,21 @@ export default function ProjectForm({ project, onSave, onCancel }: ProjectFormPr
       ...form,
       updates: project?.updates ?? [],
       brainstorm: project?.brainstorm ?? [],
+      milestones: project?.milestones ?? [],
     };
     onSave(saved);
+  };
+
+  const applyParsed = (data: ParsedPresentation) => {
+    setForm(prev => ({
+      ...prev,
+      studentName: data.studentName || prev.studentName,
+      title: data.title || prev.title,
+      description: data.description || prev.description,
+      category: CATEGORIES.includes(data.category) ? data.category : prev.category,
+      startDate: data.startDate || prev.startDate,
+      targetDate: data.targetDate || prev.targetDate,
+    }));
   };
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
@@ -78,6 +93,9 @@ export default function ProjectForm({ project, onSave, onCancel }: ProjectFormPr
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Presentation Upload */}
+          <PresentationUpload onApply={applyParsed} compact />
+
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="block text-sm text-gray-400 mb-2">Student Name *</label>

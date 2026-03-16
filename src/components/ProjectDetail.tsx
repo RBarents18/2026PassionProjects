@@ -4,9 +4,10 @@ import { generateRecommendation } from '../utils/recommendations';
 import {
   ArrowLeft, Edit, Trash2, Plus, Lightbulb, MessageSquare,
   FileText, Sparkles, Calendar, Tag, Clock, AlertTriangle,
-  TrendingUp, CheckCircle, X, Upload, Flag,
+  TrendingUp, CheckCircle, X, Upload, Flag, BarChart2,
 } from 'lucide-react';
 import PresentationUpload from './PresentationUpload';
+import GanttChart from './GanttChart';
 import type { ParsedPresentation } from '../utils/presentationParser';
 
 interface ProjectDetailProps {
@@ -24,7 +25,7 @@ const STATUS_CONFIG = {
   'completed': { label: 'Completed', color: 'text-blue-400', bg: 'bg-blue-900/30 border-blue-800', icon: CheckCircle },
 };
 
-type Tab = 'updates' | 'notes' | 'brainstorm' | 'presentation';
+type Tab = 'updates' | 'notes' | 'brainstorm' | 'presentation' | 'gantt';
 
 export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpdate }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState<Tab>('updates');
@@ -178,6 +179,7 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
             { id: 'notes', label: 'Teacher Notes', icon: FileText },
             { id: 'brainstorm', label: 'Brainstorm', icon: Lightbulb },
             { id: 'presentation', label: 'Presentation', icon: Upload },
+            { id: 'gantt', label: 'Gantt Chart', icon: BarChart2 },
           ] as const).map(tab => (
             <button
               key={tab.id}
@@ -423,6 +425,10 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
                 )}
               </div>
             </div>
+          )}
+          {/* Gantt Chart Tab */}
+          {activeTab === 'gantt' && (
+            <GanttChart project={project} onUpdate={onUpdate} />
           )}
         </div>
       </div>

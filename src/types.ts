@@ -12,6 +12,15 @@ export interface Milestone {
   completed: boolean;
 }
 
+export interface GanttEntry {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  status: 'on-track' | 'late' | 'complete';
+  comment: string;
+}
+
 export interface Project {
   id: string;
   studentName: string;
@@ -27,4 +36,6 @@ export interface Project {
   milestones: Milestone[];
   color: string;
   emoji: string;
+  ganttEntries: GanttEntry[];
+  ganttImageUrl?: string;
 }

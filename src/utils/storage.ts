@@ -9,7 +9,11 @@ export function loadProjects(): Project[] {
     if (!data) return seedProjects;
     const stored = JSON.parse(data) as Project[];
     // Backward compatibility: ensure milestones field exists
-    const storedProjects = stored.map(p => ({ ...p, milestones: p.milestones ?? [] }));
+    const storedProjects = stored.map(p => ({
+      ...p,
+      milestones: p.milestones ?? [],
+      ganttEntries: p.ganttEntries ?? [],
+    }));
     // Merge: include any seed projects whose IDs are not already in stored data.
     // This ensures projects added to getSampleProjects() always appear even when
     // localStorage already has entries, preventing manual additions from being lost.
@@ -53,6 +57,7 @@ export function getSampleProjects(): Project[] {
       notes: 'Alex is very motivated. Connect with the UA engineering department for mentorship.',
       brainstorm: ['Add a simple filter for particles', 'Explore graphene-based filtration', 'Partner with local NGO for field testing'],
       milestones: [],
+      ganttEntries: [],
       color: 'from-blue-500 to-cyan-400',
       emoji: '☀️',
     },
@@ -76,6 +81,7 @@ export function getSampleProjects(): Project[] {
       notes: 'Jordan has great creative vision but may need help with the ML fundamentals.',
       brainstorm: ['Use pre-trained model (Magenta)', 'Focus on one genre first', 'Create web interface for input'],
       milestones: [],
+      ganttEntries: [],
       color: 'from-purple-500 to-pink-400',
       emoji: '🎵',
     },
@@ -99,6 +105,7 @@ export function getSampleProjects(): Project[] {
       notes: 'Sam is ahead of schedule. Encourage to add data logging to the IoT system.',
       brainstorm: ['Add mobile app for monitoring', 'Experiment with different crops', 'Add growth rate tracking'],
       milestones: [],
+      ganttEntries: [],
       color: 'from-green-500 to-emerald-400',
       emoji: '🌱',
     },

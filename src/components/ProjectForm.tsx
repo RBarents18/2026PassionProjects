@@ -61,6 +61,8 @@ export default function ProjectForm({ project, onSave, onCancel }: ProjectFormPr
       updates: project?.updates ?? [],
       brainstorm: project?.brainstorm ?? [],
       milestones: project?.milestones ?? [],
+      ganttEntries: project?.ganttEntries ?? [],
+      ganttImageUrl: project?.ganttImageUrl,
     };
     onSave(saved);
   };

@@ -19,6 +19,8 @@ export interface GanttEntry {
   endDate: string;
   status: 'on-track' | 'late' | 'complete';
   comment: string;
+  /** IDs of GanttEntry tasks that must be completed before this one can start. */
+  dependsOn?: string[];
 }
 
 export interface Project {

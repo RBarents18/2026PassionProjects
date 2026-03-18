@@ -93,9 +93,10 @@ export default function Dashboard({ projects, onSelectProject, onCreateProject }
 }
 
 function ProjectCard({ project, onClick }: { project: Project; onClick: () => void }) {
-  const status = STATUS_CONFIG[project.status];
+  const status = STATUS_CONFIG[project.status] ?? STATUS_CONFIG['on-track'];
   const StatusIcon = status.icon;
-  const lastUpdate = project.updates[project.updates.length - 1];
+  const updates = project.updates ?? [];
+  const lastUpdate = updates[updates.length - 1];
 
   const daysUntilTarget = Math.ceil(
     (new Date(project.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
@@ -134,7 +135,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
               : `${Math.abs(daysUntilTarget)}d overdue`}
           </div>
           <span className="text-gray-500 text-xs">
-            {project.updates.length} update{project.updates.length !== 1 ? 's' : ''}
+            {updates.length} update{updates.length !== 1 ? 's' : ''}
           </span>
         </div>
 

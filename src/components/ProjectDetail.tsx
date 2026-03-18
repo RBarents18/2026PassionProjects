@@ -55,7 +55,7 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
     setActiveTab('presentation');
   };
 
-  const status = STATUS_CONFIG[project.status];
+  const status = STATUS_CONFIG[project.status] ?? STATUS_CONFIG['on-track'];
   const StatusIcon = status.icon;
 
   const handleAddUpdate = () => {

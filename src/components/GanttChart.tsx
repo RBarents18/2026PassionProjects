@@ -301,7 +301,7 @@ function GanttTimeline({ entries, rangeStart, rangeEnd }: GanttTimelineProps) {
 
         {/* ── Task bars + row labels ───────────────────────── */}
         {entries.map((entry, i) => {
-          const cfg = ENTRY_STATUS_CONFIG[entry.status];
+          const cfg = ENTRY_STATUS_CONFIG[entry.status] ?? ENTRY_STATUS_CONFIG['on-track'];
           const hasPrereqs = (entry.dependsOn?.length ?? 0) > 0;
           const hasDependents = entries.some(e => e.dependsOn?.includes(entry.id));
 
@@ -875,7 +875,7 @@ export default function GanttChart({ project, onUpdate }: GanttChartProps) {
         {/* Entry cards */}
         <div className="space-y-3">
           {ganttEntries.map(entry => {
-            const cfg = ENTRY_STATUS_CONFIG[entry.status];
+            const cfg = ENTRY_STATUS_CONFIG[entry.status] ?? ENTRY_STATUS_CONFIG['on-track'];
             const StatusIcon = cfg.icon;
             const isEditing = editingId === entry.id;
 

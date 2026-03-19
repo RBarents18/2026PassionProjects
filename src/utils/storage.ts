@@ -2,18 +2,34 @@ import type { Project } from '../types';
 
 const STORAGE_KEY = 'passion_projects_v1';
 
+const VALID_STATUSES: Project['status'][] = ['on-track', 'needs-attention', 'at-risk', 'completed'];
+
 export function loadProjects(): Project[] {
   const seedProjects = getSampleProjects();
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return seedProjects;
-    const stored = JSON.parse(data) as Project[];
-    // Backward compatibility: ensure milestones field exists
-    const storedProjects = stored.map(p => ({
-      ...p,
-      milestones: p.milestones ?? [],
-      ganttEntries: p.ganttEntries ?? [],
-    }));
+    const stored = JSON.parse(data);
+    // Guard: stored data must be an array
+    if (!Array.isArray(stored)) return seedProjects;
+    // Backward compatibility: ensure all expected fields exist on every project
+    const storedProjects: Project[] = stored
+      .filter((p): p is Record<string, unknown> => p !== null && typeof p === 'object')
+      .map(p => ({
+        ...(p as unknown as Project),
+        updates: Array.isArray(p['updates']) ? (p['updates'] as Project['updates']) : [],
+        notes: typeof p['notes'] === 'string' ? p['notes'] : '',
+        brainstorm: Array.isArray(p['brainstorm']) ? (p['brainstorm'] as string[]) : [],
+        milestones: Array.isArray(p['milestones']) ? (p['milestones'] as Project['milestones']) : [],
+        ganttEntries: Array.isArray(p['ganttEntries'])
+          ? (p['ganttEntries'] as Record<string, unknown>[]).map(e => ({
+              ...(e as unknown as Project['ganttEntries'][number]),
+              dependsOn: Array.isArray(e['dependsOn']) ? (e['dependsOn'] as string[]) : [],
+            }))
+          : [],
+      }))
+      // Skip any entry missing the essential 'id' field or with an invalid 'status'
+      .filter(p => typeof p.id === 'string' && p.id.length > 0 && VALID_STATUSES.includes(p.status));
     // Merge: include any seed projects whose IDs are not already in stored data.
     // This ensures projects added to getSampleProjects() always appear even when
     // localStorage already has entries, preventing manual additions from being lost.

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import type { Project } from '../types';
 import { ArrowLeft, Save } from 'lucide-react';
-import PresentationUpload from './PresentationUpload';
 import type { ParsedPresentation } from '../utils/presentationParser';
+
+const PresentationUpload = lazy(() => import('./PresentationUpload'));
 
 interface ProjectFormProps {
   project: Project | null;
@@ -96,7 +97,9 @@ export default function ProjectForm({ project, onSave, onCancel }: ProjectFormPr
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Presentation Upload */}
-          <PresentationUpload onApply={applyParsed} compact />
+          <Suspense fallback={<div className="text-gray-400 text-sm p-4">Loading…</div>}>
+            <PresentationUpload onApply={applyParsed} compact />
+          </Suspense>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">

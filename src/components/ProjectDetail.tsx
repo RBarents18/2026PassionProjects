@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import type { Project, Update, Milestone } from '../types';
 import { generateRecommendation } from '../utils/recommendations';
 import {
@@ -6,9 +6,10 @@ import {
   FileText, Sparkles, Calendar, Tag, Clock, AlertTriangle,
   TrendingUp, CheckCircle, X, Upload, Flag, BarChart2,
 } from 'lucide-react';
-import PresentationUpload from './PresentationUpload';
-import GanttChart from './GanttChart';
 import type { ParsedPresentation } from '../utils/presentationParser';
+
+const PresentationUpload = lazy(() => import('./PresentationUpload'));
+const GanttChart = lazy(() => import('./GanttChart'));
 
 interface ProjectDetailProps {
   project: Project;
@@ -336,7 +337,9 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
           {activeTab === 'presentation' && (
             <div className="space-y-6">
               {/* Upload section */}
-              <PresentationUpload onApply={handleApplyPresentation} />
+              <Suspense fallback={<div className="text-gray-400 text-sm p-4">Loading…</div>}>
+                <PresentationUpload onApply={handleApplyPresentation} />
+              </Suspense>
 
               {/* Milestones / Timeline */}
               <div>
@@ -428,7 +431,9 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
           )}
           {/* Gantt Chart Tab */}
           {activeTab === 'gantt' && (
-            <GanttChart project={project} onUpdate={onUpdate} />
+            <Suspense fallback={<div className="text-gray-400 text-sm p-4">Loading…</div>}>
+              <GanttChart project={project} onUpdate={onUpdate} />
+            </Suspense>
           )}
         </div>
       </div>

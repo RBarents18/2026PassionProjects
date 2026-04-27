@@ -22,20 +22,62 @@ const COLORS = [
   { value: 'from-yellow-500 to-orange-400', label: 'Golden Yellow' },
 ];
 
-const EMOJIS = ['🔬', '💻', '🌱', '🎵', '🚀', '⚡', '🌊', '🔭', '🧬', '🎨', '📡', '🤖', '☀️', '🌍', '💡'];
+const EMOJIS = [
+  // Science & Research
+  '🔬', '🧬', '🧪', '🧲', '🔭', '⚗️', '🧠',
+  // Technology & Computing
+  '💻', '🤖', '📡', '📱', '🖥️', '💾', '🎮',
+  // Engineering & Making
+  '⚙️', '🔧', '🔩', '🛠️', '🏗️', '🔋', '💡',
+  // Space & Physics
+  '🚀', '🛸', '🌍', '🌙', '⭐', '☀️', '⚡',
+  // Nature & Environment
+  '🌱', '🌿', '🌲', '💧', '🌊', '🌬️', '♻️',
+  // Health & Medicine
+  '🩺', '💊', '❤️', '🏥',
+  // Arts & Creativity
+  '🎨', '🎵', '🎭', '📷', '✏️',
+  // Sports
+  '⛳', '🎾', '⚽', '🏀', '🏈', '⚾', '🎯',
+  '🏊', '🚴', '🏋️', '🏆', '🥇',
+  // Agriculture & Food
+  '🌾', '🥬', '🍃',
+  // Other
+  '📚', '🎓', '🌟', '🗺️', '📊',
+];
 
 const CATEGORIES = [
+  // Computer Science
   'Computer Science',
-  'Environmental Science',
+  'Software Engineering',
+  'Computer Engineering',
+  'Data Science & Machine Learning',
+  'Cybersecurity',
+  'Computer Science & Arts',
+  // Engineering Sub-disciplines
+  'Aerospace Engineering',
+  'Agricultural Engineering',
+  'Biomedical Engineering',
+  'Chemical Engineering',
+  'Civil Engineering',
+  'Electrical Engineering',
+  'Environmental Engineering',
+  'Industrial Engineering',
+  'Materials Science & Engineering',
+  'Mechanical Engineering',
+  'Nuclear Engineering',
+  'Robotics & Automation',
+  'Structural Engineering',
+  'Systems Engineering',
+  // Science
   'Biotechnology',
-  'Engineering',
-  'Physics',
+  'Biotechnology & IoT',
   'Chemistry',
+  'Environmental Science',
+  'Physics',
+  // Other STEM & Interdisciplinary
   'Mathematics',
   'Social Science',
-  'Computer Science & Arts',
-  'Biotechnology & IoT',
-  'Environmental Engineering',
   'Other',
 ];
 

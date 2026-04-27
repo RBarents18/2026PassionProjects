@@ -20,6 +20,18 @@ const COLORS = [
   { value: 'from-indigo-500 to-violet-400', label: 'Deep Indigo' },
   { value: 'from-teal-500 to-cyan-400', label: 'Teal' },
   { value: 'from-yellow-500 to-orange-400', label: 'Golden Yellow' },
+  { value: 'from-pink-500 to-fuchsia-400', label: 'Hot Pink' },
+  { value: 'from-sky-500 to-blue-400', label: 'Sky Blue' },
+  { value: 'from-lime-500 to-green-400', label: 'Lime Green' },
+  { value: 'from-amber-500 to-yellow-400', label: 'Amber' },
+  { value: 'from-violet-500 to-purple-400', label: 'Violet' },
+  { value: 'from-cyan-500 to-teal-400', label: 'Aqua' },
+  { value: 'from-rose-500 to-pink-400', label: 'Rose' },
+  { value: 'from-fuchsia-500 to-violet-400', label: 'Fuchsia' },
+  { value: 'from-emerald-500 to-lime-400', label: 'Emerald Lime' },
+  { value: 'from-blue-600 to-indigo-400', label: 'Royal Blue' },
+  { value: 'from-orange-600 to-red-400', label: 'Lava' },
+  { value: 'from-slate-500 to-gray-400', label: 'Silver' },
 ];
 
 const EMOJIS = [
@@ -30,7 +42,7 @@ const EMOJIS = [
   // Engineering & Making
   '⚙️', '🔧', '🔩', '🛠️', '🏗️', '🔋', '💡',
   // Space & Physics
-  '🚀', '🛸', '🌍', '🌙', '⭐', '☀️', '⚡',
+  '🚀', '🛸', '✈️', '🌍', '🌙', '⭐', '☀️', '⚡',
   // Nature & Environment
   '🌱', '🌿', '🌲', '💧', '🌊', '🌬️', '♻️',
   // Health & Medicine
@@ -228,7 +240,7 @@ export default function ProjectForm({ project, onSave, onCancel }: ProjectFormPr
           {/* Color Selection */}
           <div>
             <label className="block text-sm text-gray-400 mb-2">Card Color</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-5 gap-2">
               {COLORS.map(c => (
                 <button
                   key={c.value}

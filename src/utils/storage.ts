@@ -1,4 +1,4 @@
-import type { Project } from '../types';
+import type { Project, BudgetItem } from '../types';
 
 const STORAGE_KEY = 'passion_projects_v1';
 
@@ -19,7 +19,7 @@ export function loadProjects(): Project[] {
         ...(p as unknown as Project),
         updates: Array.isArray(p['updates']) ? (p['updates'] as Project['updates']) : [],
         notes: typeof p['notes'] === 'string' ? p['notes'] : '',
-        brainstorm: Array.isArray(p['brainstorm']) ? (p['brainstorm'] as string[]) : [],
+        budget: Array.isArray(p['budget']) ? (p['budget'] as BudgetItem[]) : [],
         milestones: Array.isArray(p['milestones']) ? (p['milestones'] as Project['milestones']) : [],
         ganttEntries: Array.isArray(p['ganttEntries'])
           ? (p['ganttEntries'] as Record<string, unknown>[]).map(e => ({
@@ -71,7 +71,7 @@ export function getSampleProjects(): Project[] {
         },
       ],
       notes: 'Alex is very motivated. Connect with the UA engineering department for mentorship.',
-      brainstorm: ['Add a simple filter for particles', 'Explore graphene-based filtration', 'Partner with local NGO for field testing'],
+      budget: [],
       milestones: [],
       ganttEntries: [],
       color: 'from-blue-500 to-cyan-400',
@@ -95,7 +95,7 @@ export function getSampleProjects(): Project[] {
         },
       ],
       notes: 'Jordan has great creative vision but may need help with the ML fundamentals.',
-      brainstorm: ['Use pre-trained model (Magenta)', 'Focus on one genre first', 'Create web interface for input'],
+      budget: [],
       milestones: [],
       ganttEntries: [],
       color: 'from-purple-500 to-pink-400',
@@ -119,7 +119,7 @@ export function getSampleProjects(): Project[] {
         },
       ],
       notes: 'Sam is ahead of schedule. Encourage to add data logging to the IoT system.',
-      brainstorm: ['Add mobile app for monitoring', 'Experiment with different crops', 'Add growth rate tracking'],
+      budget: [],
       milestones: [],
       ganttEntries: [],
       color: 'from-green-500 to-emerald-400',

@@ -114,7 +114,7 @@ export default function ProjectForm({ project, onSave, onCancel }: ProjectFormPr
       id: project?.id ?? Date.now().toString(),
       ...form,
       updates: project?.updates ?? [],
-      brainstorm: project?.brainstorm ?? [],
+      budget: project?.budget ?? [],
       milestones: project?.milestones ?? [],
       ganttEntries: project?.ganttEntries ?? [],
       ganttImageUrl: project?.ganttImageUrl,

@@ -1,10 +1,11 @@
 import { useState, lazy, Suspense } from 'react';
-import type { Project, Update, Milestone } from '../types';
+import type { Project, Update, Milestone, BudgetItem } from '../types';
 import { generateRecommendation } from '../utils/recommendations';
 import {
-  ArrowLeft, Edit, Trash2, Plus, Lightbulb, MessageSquare,
+  ArrowLeft, Edit, Trash2, Plus, MessageSquare,
   FileText, Sparkles, Calendar, Tag, Clock, AlertTriangle,
-  TrendingUp, CheckCircle, X, Upload, Flag, BarChart2,
+  TrendingUp, TrendingDown, CheckCircle, X, Upload, Flag, BarChart2,
+  DollarSign, Wallet,
 } from 'lucide-react';
 import type { ParsedPresentation } from '../utils/presentationParser';
 
@@ -26,12 +27,17 @@ const STATUS_CONFIG = {
   'completed': { label: 'Completed', color: 'text-blue-400', bg: 'bg-blue-900/30 border-blue-800', icon: CheckCircle },
 };
 
-type Tab = 'updates' | 'notes' | 'brainstorm' | 'presentation' | 'gantt';
+type Tab = 'updates' | 'notes' | 'budget' | 'presentation' | 'gantt';
 
 export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpdate }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState<Tab>('updates');
   const [newUpdateText, setNewUpdateText] = useState('');
-  const [newBrainstormItem, setNewBrainstormItem] = useState('');
+  const [newBudgetDescription, setNewBudgetDescription] = useState('');
+  const [newBudgetCategory, setNewBudgetCategory] = useState('Materials');
+  const [newBudgetAmount, setNewBudgetAmount] = useState('');
+  const [newBudgetType, setNewBudgetType] = useState<'expense' | 'income'>('expense');
+  const [newBudgetDate, setNewBudgetDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newBudgetStatus, setNewBudgetStatus] = useState<'planned' | 'actual'>('planned');
   const [notes, setNotes] = useState(project.notes);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newMilestoneTitle, setNewMilestoneTitle] = useState('');
@@ -44,14 +50,12 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
       ...m,
       id: crypto.randomUUID(),
     }));
-    const newBrainstormItems = data.nextSteps.filter(s => !project.brainstorm.includes(s));
     onUpdate({
       ...project,
       studentName: data.studentName || project.studentName,
       title: data.title || project.title,
       description: data.description || project.description,
       milestones: [...milestones, ...newMilestones],
-      brainstorm: [...project.brainstorm, ...newBrainstormItems],
     });
     setActiveTab('presentation');
   };
@@ -80,14 +84,38 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
     onUpdate({ ...project, notes });
   };
 
-  const handleAddBrainstorm = () => {
-    if (!newBrainstormItem.trim()) return;
-    onUpdate({ ...project, brainstorm: [...project.brainstorm, newBrainstormItem.trim()] });
-    setNewBrainstormItem('');
+  const BUDGET_CATEGORIES = [
+    'Materials', 'Equipment', 'Travel / Transportation', 'Printing',
+    'Software / Tech', 'Food / Refreshments', 'Marketing', 'Other',
+  ];
+
+  const budget: BudgetItem[] = project.budget ?? [];
+
+  const totalIncome = budget.filter(b => b.type === 'income').reduce((sum, b) => sum + b.amount, 0);
+  const totalExpenses = budget.filter(b => b.type === 'expense').reduce((sum, b) => sum + b.amount, 0);
+  const balance = totalIncome - totalExpenses;
+
+  const handleAddBudgetItem = () => {
+    const amount = parseFloat(newBudgetAmount);
+    if (!newBudgetDescription.trim() || isNaN(amount) || amount <= 0) return;
+    const item: BudgetItem = {
+      id: crypto.randomUUID(),
+      description: newBudgetDescription.trim(),
+      category: newBudgetCategory,
+      amount,
+      type: newBudgetType,
+      date: newBudgetDate,
+      status: newBudgetStatus,
+    };
+    onUpdate({ ...project, budget: [...budget, item] });
+    setNewBudgetDescription('');
+    setNewBudgetAmount('');
+    setNewBudgetDate(new Date().toISOString().split('T')[0]);
+    setNewBudgetStatus('planned');
   };
 
-  const handleDeleteBrainstorm = (index: number) => {
-    onUpdate({ ...project, brainstorm: project.brainstorm.filter((_, i) => i !== index) });
+  const handleDeleteBudgetItem = (id: string) => {
+    onUpdate({ ...project, budget: budget.filter(b => b.id !== id) });
   };
 
   const handleAddMilestone = () => {
@@ -178,7 +206,7 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
           {([
             { id: 'updates', label: 'Updates Log', icon: MessageSquare },
             { id: 'notes', label: 'Teacher Notes', icon: FileText },
-            { id: 'brainstorm', label: 'Brainstorm', icon: Lightbulb },
+            { id: 'budget', label: 'Budget', icon: DollarSign },
             { id: 'presentation', label: 'Presentation', icon: Upload },
             { id: 'gantt', label: 'Gantt Chart', icon: BarChart2 },
           ] as const).map(tab => (
@@ -285,51 +313,158 @@ export default function ProjectDetail({ project, onBack, onEdit, onDelete, onUpd
             </div>
           )}
 
-          {/* Brainstorm Tab */}
-          {activeTab === 'brainstorm' && (
+          {/* Budget Tab */}
+          {activeTab === 'budget' && (
             <div>
+              {/* Summary Cards */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 text-center">
+                  <div className="flex items-center justify-center gap-1.5 text-green-400 mb-1">
+                    <TrendingUp size={16} />
+                    <span className="text-xs font-medium uppercase tracking-wide">Total Income</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-400">${totalIncome.toFixed(2)}</p>
+                </div>
+                <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 text-center">
+                  <div className="flex items-center justify-center gap-1.5 text-red-400 mb-1">
+                    <TrendingDown size={16} />
+                    <span className="text-xs font-medium uppercase tracking-wide">Total Expenses</span>
+                  </div>
+                  <p className="text-2xl font-bold text-red-400">${totalExpenses.toFixed(2)}</p>
+                </div>
+                <div className={`bg-gray-900 rounded-xl border p-4 text-center ${balance >= 0 ? 'border-green-800' : 'border-red-800'}`}>
+                  <div className={`flex items-center justify-center gap-1.5 mb-1 ${balance >= 0 ? 'text-indigo-400' : 'text-red-400'}`}>
+                    <Wallet size={16} />
+                    <span className="text-xs font-medium uppercase tracking-wide">Balance</span>
+                  </div>
+                  <p className={`text-2xl font-bold ${balance >= 0 ? 'text-indigo-400' : 'text-red-400'}`}>
+                    {balance < 0 ? '-' : ''}${Math.abs(balance).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Add Entry Form */}
               <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 mb-6">
-                <h3 className="text-white font-medium mb-3">Add Brainstorm Idea</h3>
-                <div className="flex gap-2">
+                <h3 className="text-white font-medium mb-3">Add Budget Entry</h3>
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   <input
                     type="text"
-                    value={newBrainstormItem}
-                    onChange={e => setNewBrainstormItem(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleAddBrainstorm()}
-                    placeholder="Enter an idea, next step, or question..."
-                    className="flex-1 bg-gray-800 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
+                    value={newBudgetDescription}
+                    onChange={e => setNewBudgetDescription(e.target.value)}
+                    placeholder="Description (e.g., PVC pipe, batteries…)"
+                    className="col-span-2 bg-gray-800 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
                   />
+                  <select
+                    value={newBudgetCategory}
+                    onChange={e => setNewBudgetCategory(e.target.value)}
+                    className="bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
+                  >
+                    {BUDGET_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newBudgetAmount}
+                    onChange={e => setNewBudgetAmount(e.target.value)}
+                    placeholder="Amount ($)"
+                    className="bg-gray-800 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewBudgetType('expense')}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${newBudgetType === 'expense' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                    >
+                      Expense
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewBudgetType('income')}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${newBudgetType === 'income' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                    >
+                      Income
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewBudgetStatus('planned')}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${newBudgetStatus === 'planned' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                    >
+                      Planned
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewBudgetStatus('actual')}
+                      className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${newBudgetStatus === 'actual' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                    >
+                      Actual
+                    </button>
+                  </div>
+                  <input
+                    type="date"
+                    value={newBudgetDate}
+                    onChange={e => setNewBudgetDate(e.target.value)}
+                    className="bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex justify-end">
                   <button
-                    onClick={handleAddBrainstorm}
-                    disabled={!newBrainstormItem.trim()}
+                    onClick={handleAddBudgetItem}
+                    disabled={!newBudgetDescription.trim() || !newBudgetAmount || parseFloat(newBudgetAmount) <= 0}
                     className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                   >
                     <Plus size={16} />
-                    Add
+                    Add Entry
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {project.brainstorm.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-900 rounded-xl border border-gray-800 p-4 flex items-start gap-3 group"
-                  >
-                    <Lightbulb size={18} className="text-yellow-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-gray-300 text-sm flex-1">{item}</p>
-                    <button
-                      onClick={() => handleDeleteBrainstorm(index)}
-                      className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ))}
-                {project.brainstorm.length === 0 && (
-                  <p className="text-gray-500 text-center py-8 col-span-2">No brainstorm ideas yet. Add ideas to explore!</p>
-                )}
-              </div>
+              {/* Budget Table */}
+              {budget.length > 0 ? (
+                <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-800 text-gray-400 text-xs uppercase tracking-wide">
+                        <th className="px-4 py-3 text-left">Description</th>
+                        <th className="px-4 py-3 text-left">Category</th>
+                        <th className="px-4 py-3 text-left">Date</th>
+                        <th className="px-4 py-3 text-left">Status</th>
+                        <th className="px-4 py-3 text-right">Amount</th>
+                        <th className="px-4 py-3"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800">
+                      {[...budget].sort((a, b) => a.date.localeCompare(b.date)).map(item => (
+                        <tr key={item.id} className="group hover:bg-gray-800/50 transition-colors">
+                          <td className="px-4 py-3 text-white">{item.description}</td>
+                          <td className="px-4 py-3 text-gray-400">{item.category}</td>
+                          <td className="px-4 py-3 text-gray-400">{item.date}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.status === 'actual' ? 'bg-green-900/40 text-green-400' : 'bg-yellow-900/40 text-yellow-400'}`}>
+                              {item.status === 'actual' ? 'Actual' : 'Planned'}
+                            </span>
+                          </td>
+                          <td className={`px-4 py-3 text-right font-semibold ${item.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+                            {item.type === 'income' ? '+' : '-'}${item.amount.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => handleDeleteBudgetItem(item.id)}
+                              className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                            >
+                              <X size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">No budget entries yet. Add income and expenses above to get started!</p>
+              )}
             </div>
           )}
 

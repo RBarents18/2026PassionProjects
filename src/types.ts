@@ -23,6 +23,16 @@ export interface GanttEntry {
   dependsOn?: string[];
 }
 
+export interface BudgetItem {
+  id: string;
+  description: string;
+  category: string;
+  amount: number;
+  type: 'expense' | 'income';
+  date: string;
+  status: 'planned' | 'actual';
+}
+
 export interface Project {
   id: string;
   studentName: string;
@@ -34,7 +44,7 @@ export interface Project {
   targetDate: string;
   updates: Update[];
   notes: string;
-  brainstorm: string[];
+  budget: BudgetItem[];
   milestones: Milestone[];
   color: string;
   emoji: string;
